@@ -24,17 +24,15 @@ This tool could break slow, outdated websites. This tool does not care about "no
 
 # Notes on crawl speed & rate limiting: 
 
-The script only asks for 1 page at a time, but better throttle controls can be added. Adding a simple delay timer would keep the request frequency within the bounds of a rate limiter. 
+Throttle controls can be added. Adding a simple delay timer would keep the request frequency within the bounds of most rate limiters. 
 Just in case, there is a CUTOFF setting that will stop the crawler after it visits 10,000 links, this of course can be changed to meet your needs.
 
 # Limitations:
 Due to CORS, following external links typically won't work, but they are added to the collection of links. This tool wasn't intended to run in the wild. There are plenty of fancier crawlers to help you on your quest to download the entire internet.
-
-
 
 # Future plans:
 CSV exports:
 As mentioned, I will be adding CSV downloader. So instead of just logging to the console, the scraped data will be exported to a CSV file.
 
 Expanding on more than just link collection:
-The DOM parser can be used to collect more than just links. I have plans to expand on the capabilities, such as natural language processing, SEO reports, extracting tabular data, searching for certain types of files, etc.
+The DOM parser API can be used to collect more than just links. I have plans to expand on the capabilities, such as natural language processing, SEO reports, extracting tabular data, searching for certain types of files, etc.
