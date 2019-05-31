@@ -3,6 +3,7 @@ class linkSpider {
     this.newLinks = [];
     this.visitedLinks = [];
     this.CUTOFF = 10000;
+    this.stopCrawl = false;
     this.domain = window.location.origin;
     this.startPage = window.location.href; //start from the current page
     //this.startPage = domain;  //start from the home page
@@ -11,6 +12,10 @@ class linkSpider {
     	internal: [],
     	external: []
     }
+  }
+
+  stop(){
+    this.stopCrawl = true;
   }
 
   getLinks(doc){
@@ -56,18 +61,21 @@ async fetchURL(url,options){
   catch(error) {
   	console.error(error);
   }
-  if(this.newLinks.length > 0 && this.visitedLinks.length < this.CUTOFF){
+  if(this.newLinks.length > 0 && this.visitedLinks.length < this.CUTOFF && this.stopCrawl == false){
   	var newLink = this.newLinks.shift();
   	this.fetchURL(newLink)
   }else{
       if(this.visitedLinks.length >= this.CUTOFF){
         console.log("CUTOFF Reached");
-      }else{
-        console.log("DONE",this.linkCollection)
+      }else if(this.stopCrawl){
+        console.log("Manually Stopped.",this.linkCollection)
+      } else{
+        console.log("DONE. No more links to crawl!",this.linkCollection)
       }
   				return true;
   		}
   }
+
 }
 var runLinkSpider = new linkSpider();
 runLinkSpider.fetchURL(window.location.href);
