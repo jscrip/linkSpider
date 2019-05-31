@@ -1,15 +1,15 @@
 class linkSpider {
   constructor() {
-    this.CUTOFF = 10000;
+    this.CUTOFF = 100;
     this.stopCrawl = false;
     this.domain = window.location.origin;
     this.startPage = window.location.href; //start from the current page
     //this.startPage = domain;  //start from the home page
 
     this.links = {
-      internal: new Set(),
-      external: new Set(),
-      misc: new Set(),
+      internal: [],
+      external: [],
+      misc: [],
       visited: new Set(),
       q: new Set()
     }
@@ -47,12 +47,19 @@ class linkSpider {
 
       if (link.href.indexOf(this.domain) > -1) {
         this.links.q.add(link.href);
-        this.links.internal.add(link); //if the link contains the domain, add it to the internal link list
+        var alreadyExists = this.links.internal.find(i => i.href == link.href);
+        if(!alreadyExists){
+            this.links.internal.push(link); //if the link contains the domain, add it to the internal link list
+        }
       } else if (regExURL.test(link.href)) {
         //	this.links.q.add(link.href);
-        this.links.external.add(link); //otherwise add links containing URLs to the external link list
+        var alreadyExists = this.links.external.find(e => e.href == link.href);
+        if(!alreadyExists){
+            this.links.external.push(link); //otherwise add links containing URLs to the external link list
+        }
+      
       } else {
-        this.links.misc.add(link); //otherwise add it to misc links.
+        this.links.misc.push(link); //otherwise add it to misc links.
       }
     })
 
