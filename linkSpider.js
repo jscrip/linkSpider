@@ -1,4 +1,3 @@
-*/
 class linkSpider {
   constructor() {
     this.newLinks = [];
@@ -69,7 +68,6 @@ async fetchURL(url,options){
   				return true;
   		}
   }
-
 }
 var runLinkSpider = new linkSpider();
 runLinkSpider.fetchURL(window.location.href);
