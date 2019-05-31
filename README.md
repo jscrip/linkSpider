@@ -1,4 +1,4 @@
-# linkSpider
+# linkSpider.js
 A JavaScript Link Crawler you can inject in the browser.
 
 I built this tool to discover all "visible" links on a few domains I own.
@@ -12,6 +12,8 @@ runLinkSpider.visitedLinks
 //returns an object containing 2 arrays, one for internal links, the other for external links
 runLinkSpider.linkCollection 
 
+//stop the crawler
+runLinkSpider.stop() 
 
 The crawler grabs all the links from the existing page by default. You can change the starting point to any page within the domain of the site you are visiting.
 
