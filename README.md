@@ -6,11 +6,11 @@ I built this tool to discover all "visible" links on a few domains I own.
 # How does it work?
 As soon as you copy and paste this code into the console view of your browser and hit enter, you should see the requests logging  to the console. At any point while the crawler is running, you can check the status by typing in:
 
-runLinkSpider.visitedLinks  - returns an array of the visted links
+crawler.visitedLinks  - returns an array of the visted links
 
-runLinkSpider.linkCollection  - returns an object containing 2 arrays, one for internal links, the other for external links
+crawler.linkCollection  - returns an object containing 2 arrays, one for internal links, the other for external links
 
-runLinkSpider.stop()  - stop the crawler
+crawler.stop()  - stop the crawler
 
 The crawler grabs all the links from the existing page by default. You can change the starting point to any page within the domain of the site you are visiting.
 
