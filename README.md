@@ -9,9 +9,11 @@ Upon injection, the crawler gathers links from the page, then continues to crawl
 
 At any point while the crawler is running, you can check the status in the console by typing in:
 
-crawler.links  - returns an object containing  visted, internal, and "other" links for external links, and links that don't use a standard url.
+```crawler.links```
+returns an object containing visted, internal, and "other" links for external links, and links that don't use a standard url.
 
-crawler.stop()  - stop the crawler
+```crawler.stop()```
+stop the crawler
 
 ## Why?
 While Puppeteer, Nightmare, Selenium, Scrapy, and the heaps of other tools are great, I needed a no-install solution for automating web-based tasks at work, using a PC with restricted user policies. After building the same basic functionality a few times over, I begain making things more modular. This script is a general starting point for more advanced solutions like report generators and bulk data tools.
