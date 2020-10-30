@@ -1,105 +1,109 @@
 class linkSpider {
   constructor() {
-    this.CUTOFF = 100;
-    this.stopCrawl = false;
+    this.LIMIT = 200;
+    this.delay = async ms => new Promise(r => setTimeout(r, ms));
+    this.ms = false;// 500;
+    this.stop = false;
     this.domain = window.location.origin;
-    this.startPage = window.location.href; //start from the current page
-    //this.startPage = domain;  //start from the home page
-
+    this.startPage = window.location.href;
+    this.timer = setInterval(() => console.log({links:this.links, limit:this.LIMIT}), 4000);
+    this.titles = {};
     this.links = {
-      internal: [],
-      external: [],
-      misc: [],
+      internal: new Set(),
+      other: new Set(),
       visited: new Set(),
       q: new Set()
     }
-
   }
-
-  stop() {
-    this.stopCrawl = true;
+  save(data, fileName){
+      var d = document;
+      var a = d.createElement('a');
+      a.href = window.URL.createObjectURL(new Blob([d3.csvFormat(data)],{type:'text/csv;charset=utf-8;'}));
+      a.setAttribute('download', `${fileName}.csv`);
+      d.body.appendChild(a);
+      a.click();
+      d.body.removeChild(a);
   }
-
-  getLinks(doc) {
-    return [...doc.querySelectorAll('a')].reduce((collection, link) => {
-      collection.push({
-        title: link.title,
-        text: link.innerText.replace(/[^a-z0-9\s]/gim, "").replace(/[\s]+/gim, " "),
-        href: link.href
-      })
-      return collection;
-    }, []);
-  }
-
-  parse(htmlString) {
-    var regExURL = RegExp('([--:\w?@%&+~#=]*\.[a-z]{2,4}\/{0,2})((?:[?&](?:\w+)=(?:\w+))+|[--:\w?@%&+~#=]+)?', 'g');
-    var parser = new DOMParser();
-    // Parse the text
-    var doc = parser.parseFromString(htmlString, "text/html");
-    var links = new Set(this.getLinks(doc));
-
-    /*
-    	filter out the links that have already been visited, then loop through each remaining link
-
-    */
-    [...links].filter(link => !this.links.visited.has(link.href)).forEach(link => {
-      //try to add the link to the link queue. Since it is a set, duplicates will not be added, so we can skip needing an extra conditional statement
-
-      if (link.href.indexOf(this.domain) > -1) {
-        this.links.q.add(link.href);
-        var alreadyExists = this.links.internal.find(i => i.href == link.href);
-        if(!alreadyExists){
-            this.links.internal.push(link); //if the link contains the domain, add it to the internal link list
-        }
-      } else if (regExURL.test(link.href)) {
-        //	this.links.q.add(link.href);
-        var alreadyExists = this.links.external.find(e => e.href == link.href);
-        if(!alreadyExists){
-            this.links.external.push(link); //otherwise add links containing URLs to the external link list
-        }
-      
-      } else {
-        this.links.misc.push(link); //otherwise add it to misc links.
+  flattenJSON(o) {
+    return Object.entries(o).reduce((arr,e) => {
+      for (let url of e[1]){
+        if(e[0] == "internal"){
+          
+        }else if(e[0] == "visited"){
+          arr.push({type:e[0],url:url,title:this.titles[url]});
+        }else{
+          arr.push({type:e[0],url:url,title:""});
+        }      
       }
-    })
-
+      return arr;
+    },[]);
   }
-
-  async fetchURL(url, options) {
-
+  halt() {
+    this.stop = true;
+    clearInterval(this.timer);
+    console.log("Crawl Complete. Saving Link Report...");
+    try{
+      this.save(this.flattenJSON(this.links), `${this.domain}_link_report`);  
+    }catch(e){console.log({"saveError":e})}
+  }
+  cleanStr(s) { return s.replace(/[^a-z0-9\s]/gim,"").replace(/[\s]+/gim, " ").trim()}
+  parse(htmlString,url) {
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(htmlString, "text/html");
+    var links = new Set(doc.links);
+    var title = doc.title;
+    this.titles[url] = title;
+    [...links].forEach(link => {
+      var a = link.href;
+      if (a.indexOf(this.domain) > -1) {
+        this.links.q.add(a);
+        this.links.internal.add(a);
+      } else {
+        this.links.other.add(a);
+      }
+  });
+  }
+  async fetchURL(url) {
     this.links.visited.add(url);
-    this.links.q.delete(url)
-
+    this.links.q.delete(url);
     try {
-      var response = await fetch(url, options);
+      if(!isNaN(this.ms) && this.ms > 0){
+        console.log(`Delaying ${this.ms} milliseconds`);
+        await this.delay(this.ms);
+      }
+      var response = await fetch(url.split("#")[0].split("?")[0]);
       if (response.status == 200) {
         var htmlString = await response.text();
-        this.parse(htmlString);
-      } else {
-        console.log("ERROR: Server returned status:", response.status);
+        this.parse(htmlString,url);
       }
-
-    } catch (error) {
-      console.error(error);
+    }catch(e){console.log({e})}
+    if(this.links.q.size > 0 && this.links.visited.size < this.LIMIT && this.stop == false){
+        this.fetchURL([...this.links.q].shift())
+    }else{
+      this.halt();
     }
-    /*if there are still links to crawl & we haven't reached our cutoff point & we haven't forced the crawler to stop,
-    	then fetch the next link.
-    */
-    if (this.links.q.size > 0 && this.links.visited.size < this.CUTOFF && this.stopCrawl == false) {
-      this.fetchURL([...this.links.q].shift())
-    } else { //Logic to log the reason the crawler stopped.
-      if (this.links.visited.size >= this.CUTOFF) {
-        console.log("CUTOFF Reached", this.links);
-      } else if (this.stopCrawl) {
-        console.log("Manually Stopped.", this.links)
-      } else {
-        console.log("DONE. No more links to crawl!", this.links)
-      }
-      return this.links;
-    }
-
   }
-
 }
-var crawler = new linkSpider();
-crawler.fetchURL(window.location.href)
+  var options = {
+    scripts: ["https://d3js.org/d3.v6.min.js"]
+  }
+	var run = () => {
+    var crawler = new linkSpider();
+    crawler.fetchURL(window.location.href);
+    
+  }
+  const loadScripts = ({scripts}) => {
+    var scriptCountdown = scripts.length;
+    var loadScript = (url) => {
+      var scriptsLoaded = () => scriptCountdown == 0 ? run() : null;
+      var imported = document.createElement('script');
+      imported.src = url;
+      imported.addEventListener("load", () => {
+        scriptCountdown--;
+        scriptsLoaded();
+      });
+      document.head.appendChild(imported);
+    }
+    scripts.forEach(loadScript)
+  }
+  loadScripts(options);
