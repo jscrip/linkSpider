@@ -1,35 +1,35 @@
 # linkSpider.js
-A JavaScript Link Crawler you can inject in the browser.
-
-I built this tool to discover all "visible" links on a few domains I own.
+An Injectable Web Crawler for the browser.
 
 # How does it work?
-As soon as you copy and paste this code into the console view of your browser and hit enter, you should see the requests logging  to the console. At any point while the crawler is running, you can check the status by typing in:
+Upon injection, the crawler gathers links from the page, then continues to crawl the target domain until it  A) visits all internal links, or  B) reaches the page limit set by the user.
 
-crawler.visitedLinks  - returns an array of the visted links
+At any point while the crawler is running, you can check the status in the console by typing in:
 
-crawler.linkCollection  - returns an object containing 2 arrays, one for internal links, the other for external links
+crawler.links  - returns an object containing  visted, internal, and "other" links for external links, and links that don't use a standard url.
 
 crawler.stop()  - stop the crawler
 
-The crawler grabs all the links from the existing page by default. You can change the starting point to any page within the domain of the site you are visiting.
+# Why?
+While Puppeteer, Nightmare, Selenium, Scrapy, and the heaps of other tools are great, I needed a no-install solution for automating web-based tasks at work, using a PC with restricted user policies. After building the same basic functionality a few times over, I begain making things more modular. This script is a general starting point for more advanced solutions like report generators and bulk data tools.
 
-Once the crawler runs out of links to crawl or when the cutoff is reached (based on the number of visited links), the collected links will be logged to the console in the browser. Internal and External links are contained in different lists, but I plan to create a CSV export option soon.
+# Benefits:
+  1: no install, assuming a web browser is available. This is especially useful on machines with limited admin rights & privelages.
+  2: bypass anti-bot security without having to spoof the user agent. Not foolproof, but surpisingly effective at evading anomaly detection on some systems.
+  3: pages are loaded in the background, using the Fetch & DOM Parser APIs. While improving performance, this also helps prevent detection by preventing external   resources from loading, such as tracking scripts, images, etc.
+  4: Operates asynchronously, reducing the chance that the browser will crash and allowing the user to multitask while crawling.
+  5: Use the dev console to unlock additional details like response times, page sizes, etc.
 
-# Use at your own risk. Don't run on sites you don't own without permission
-This tool could break slow, outdated websites. This tool does not care about "nofollow" links by design. Always ask before running any script on a site you don't own. 
+# Reporting (CSV Export):
+Once the crawler stops, it generates a CSV report containing visited, queued, and external links. Visited links include the document title, if found.
 
 # Notes on crawl speed & rate limiting: 
+Throttle controls can be adjusted using the built in delay timer. This reduces the chance of getting blocked by rate limiters.
+Also, there is a LIMIT setting that will stop the crawler after it visits n links.
 
-Throttle controls can be added. Adding a simple delay timer would keep the request frequency within the bounds of most rate limiters. 
-Just in case, there is a CUTOFF setting that will stop the crawler after it visits 10,000 links, this of course can be changed to meet your needs.
+# Browser Security Limitations:
+Due to CORS, following external links typically won't work in the browser, but they are still collected in the crawl report.
 
-# Limitations:
-Due to CORS, following external links typically won't work, but they are added to the collection of links. This tool wasn't intended to run in the wild. There are plenty of fancier crawlers to help you on your quest to download the entire internet.
-
-# Future plans:
-CSV exports:
-As mentioned, I will be adding CSV downloader. So instead of just logging to the console, the scraped data will be exported to a CSV file.
-
+# Future Plans:
 Expanding on more than just link collection:
 The DOM parser API can be used to collect more than just links. I have plans to expand on the capabilities, such as natural language processing, SEO reports, extracting tabular data, searching for certain types of files, etc.
