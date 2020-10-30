@@ -4,8 +4,8 @@ An Injectable Web Crawler for the browser.
 ## How does it work?
 Upon injection, the crawler gathers links from the page, then continues to crawl the target domain until it:
 
-## A) visits all internal links, or
-## B) reaches the page limit set by the user.
+1. visits all internal links, or
+2. reaches the page limit set by the user.
 
 At any point while the crawler is running, you can check the status in the console by typing in:
 
