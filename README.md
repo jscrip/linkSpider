@@ -22,19 +22,35 @@ While Puppeteer, Nightmare, Selenium, Scrapy, and the heaps of other tools are g
   1. no install, assuming a web browser is available. This is especially useful on machines with limited admin rights & privelages.
   2. bypass anti-bot security without having to spoof the user agent. Not foolproof, but surpisingly effective at evading anomaly detection on some systems.
   3. pages are loaded in the background, using the Fetch & DOM Parser APIs. While improving performance, this also helps prevent detection by preventing external   resources from loading, such as tracking scripts, images, etc.
-  4. Operates asynchronously, reducing the chance that the browser will crash and allowing the user to multitask while crawling.
-  5. Use the dev console to unlock additional details like response times, page sizes, etc.
+  4. Operates asynchronously, so the browser doesn't freeze during the crawl, allowing the user to use the browser while crawling the background.
+  5. Using the browser's built-in network tab unlocks additional details like server response times, page sizes, etc. This allows the user to review crawl reports, look for errors, and track progress in realtime.
 
 ## Reporting (CSV Export):
 Once the crawler stops, it generates a CSV report containing visited, queued, and external links. Visited links include the document title, if found.
 
 ## Notes on crawl speed & rate limiting: 
-Throttle controls can be adjusted using the built in delay timer. This reduces the chance of getting blocked by rate limiters.
-Also, there is a LIMIT setting that will stop the crawler after it visits n links.
+  1. Throttle controls can be adjusted using the built in delay timer. This reduces the chance of getting blocked by rate limiters.
+  2. Use LIMIT to stop the crawler after visiting n links.
 
 ## Browser Security Limitations:
-Due to CORS, following external links typically won't work in the browser, but they are still collected in the crawl report.
+Out of the box, only 1 domain can be crawled per instance. External links cannot be followed due to baked-in browser security. While I can't recommend bypassing browser security, I have had success with the following two methods:
 
+1. Browser Extensions
+   a. Userscript Managers like Tampermonkey and Greasemonkey take browser-based automatation to another level.
+      1. Automate custom JavaScript injection on any webpage.
+      2. Match scripts to specific pages by creating filters & rules based on URL patterns, params, etc.
+      3. Cross-tab Communication allows a tab to create, control, and delete other tabs. A crawler can use this feature to:
+        1. make parallel page requests
+        2. automatically spawn a crawler for each new domain
+        3. automate the occassional bulk data-entry task.
+
+2. Proxy Server
+  a. While more complicated than browser extensions, the gist is simple: make external requests look like they are coming from the same domain.
+      1. This requires a web server with at least a static home page and an API for processing external links
+      2. Access the proxy server from the browser, then launch the crawler with a URL or list of links.
+      3. Send external links to the proxy server as a URL param, POST request, or a WebSocket message.
+      4. The proxy server handles the request and forwards the response to the browser, bypassing CORS restrictions.
+  
 ## Future Plans:
 Expanding on more than just link collection:
 The DOM parser API can be used to collect more than just links. I have plans to expand on the capabilities, such as natural language processing, SEO reports, extracting tabular data, searching for certain types of files, etc.
