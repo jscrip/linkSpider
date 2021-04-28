@@ -1,5 +1,5 @@
 # linkSpider.js
-An Injectable Web Crawler for the browser.
+An injectable Web Crawler for the browser.
 
 ## How does it work?
 Upon injection, the crawler gathers links from the page, then continues to crawl the target domain until it:
@@ -20,8 +20,8 @@ While Puppeteer, Nightmare, Selenium, Scrapy, and the heaps of other tools are g
 
 ## Benefits:
   1. no install, assuming a web browser is available. This is especially useful on machines with limited admin rights & privelages.
-  2. bypass anti-bot security without having to spoof the user agent. Not foolproof, but surpisingly effective at evading anomaly detection on some systems.
-  3. pages are loaded in the background, using the Fetch & DOM Parser APIs. While improving performance, this also helps prevent detection by preventing external   resources from loading, such as tracking scripts, images, etc.
+  2. bypass anti-bot security without having to spoof the user agent. Not foolproof, but surpisingly effective at evading detection and preventing IP bans.
+  3. pages are processed in the background, using the Fetch & DOM Parser APIs. While improving performance, this also helps prevent detection by preventing external resources from loading, such as tracking scripts, images, etc.
   4. Operates asynchronously, so the browser doesn't freeze during the crawl, allowing the user to use the browser while crawling the background.
   5. Using the browser's built-in network tab unlocks additional details like server response times, page sizes, etc. This allows the user to review crawl reports, look for errors, and track progress in realtime.
 
