@@ -36,20 +36,20 @@ Once the crawler stops, it generates a CSV report containing visited, queued, an
 Out of the box, only 1 domain can be crawled per instance. External links cannot be followed due to baked-in browser security. While I can't recommend bypassing browser security, I have had success with the following two methods:
 
 1. Browser Extensions
-    a. Userscript Managers like Tampermonkey and Greasemonkey take browser-based automatation to another level.
-      1. Automate custom JavaScript injection on any webpage.
-      2. Match scripts to specific pages by creating filters & rules based on URL patterns, params, etc.
-      3. Cross-tab Communication allows a tab to create, control, and delete other tabs. A crawler can use this feature to:
+      1. Userscript Managers like Tampermonkey and Greasemonkey take browser-based automatation to another level.
+      2. Automate custom JavaScript injection on any webpage.
+      3. Match scripts to specific pages by creating filters & rules based on URL patterns, params, etc.
+      4. Cross-tab Communication allows a tab to create, control, and delete other tabs. A crawler can use this feature to:
         1. make parallel page requests
         2. automatically spawn a crawler for each new domain
         3. automate the occassional bulk data-entry task.
 
 2. Proxy Server
-    a. While more complicated than browser extensions, the gist is simple: make external requests look like they are coming from the same domain.
-      1. This requires a web server with at least a static home page and an API for processing external links
-      2. Access the proxy server from the browser, then launch the crawler with a URL or list of links.
-      3. Send external links to the proxy server as a URL param, POST request, or a WebSocket message.
-      4. The proxy server handles the request and forwards the response to the browser, bypassing CORS restrictions.
+      1. While more complicated than browser extensions, the gist is simple: make external requests look like they are coming from the same domain.
+      2. This requires a web server with at least a static home page and an API for processing external links
+      3. Access the proxy server from the browser, then launch the crawler with a URL or list of links.
+      4. Send external links to the proxy server as a URL param, POST request, or a WebSocket message.
+      5. The proxy server handles the request and forwards the response to the browser, bypassing CORS restrictions.
   
 ## Future Plans:
 Expanding on more than just link collection:
