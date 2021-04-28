@@ -16,7 +16,7 @@ returns an object containing visted, internal, and "other" links for external li
 stop the crawler
 
 ## Why?
-While Puppeteer, Nightmare, Selenium, Scrapy, and the heaps of other tools are great, I needed a no-install solution for automating web-based tasks at work, using a PC with restricted user policies. After building the same basic functionality a few times over, I began making things more modular. This script is a general starting point for more advanced solutions like report generators and bulk data tools.
+While Puppeteer, Nightmare, Selenium, Scrapy, and the heaps of other tools are great, I needed a no-install solution for automating web-based tasks at work, using a PC with restricted user policies. This script contains a collection of functions for mining data and building reports.
 
 ## Benefits:
   1. no install, assuming a web browser is available. This is especially useful on machines with limited admin rights & privelages.
