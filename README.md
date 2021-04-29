@@ -2,12 +2,13 @@
 An injectable Web Crawler for the browser.
 
 ## How does it work?
-Upon injection, the crawler gathers links from the page, then continues to crawl the target domain until it:
+1. Open the browser and go to a website you want (and are allowed) to crawl.
+3. Open the developer console, then copy and paste the script, remembering to adjust the crawl LIMIT if needed, and press ENTER.
+4. Upon injection, the crawler gets the links from the page, then continues to crawl the target domain until it:
+   1. reaches the page limit set by the user
+   2. visits all known links
 
-1. visits all internal links, or
-2. reaches the page limit set by the user.
-
-At any point while the crawler is running, you can check the status in the console by typing in:
+To check the while the crawler is running, you can check the status in the console by typing in:
 
 ```crawler.links```
 returns an object containing visted, internal, and "other" links for external links, and links that don't use a standard url.
