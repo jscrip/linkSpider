@@ -1,37 +1,44 @@
 # linkSpider.js
-An injectable Web Crawler for the browser.
 
-## How does it work?
-1. Open the browser and go to a website you want (and are allowed) to crawl.
-3. Open the developer console, then copy and paste the script, remembering to adjust the crawl LIMIT if needed, and press ENTER.
-4. Upon injection, the crawler gets the links from the page, then continues to crawl the target domain until it:
+## What is linkSpider.js?
+An injectable JavaScript Web Crawler built for modern browsers.
+
+## Why ?
+There are many great web crawlers already, but I needed a solution that didn't require software to be installed. My work was performed on a heavily restricted machine in an Enterprise environment, forcing me to push the limits of JavaScript-based automation. Over the years, I built a toolbox that is slowly becoming more modular, re-usable, and adaptable.
+
+## How to use?
+1. First, you will need a website to crawl, we'll call this the target domain.
+1. Open the browser, go to the target domain, then open the developer console.
+3. Copy and paste the linkSpider script into the console.
+   !*WARNING*!: adjust the crawler's page LIMIT if needed.  Press Enter to start the crawler. 
+4. Upon injection, the crawler gets all links from the page, downloads any new web pages that match the target domain, then repeats this process until it:
    1. reaches the page limit set by the user
-   2. visits all known links
-
-To check the while the crawler is running, you can check the status in the console by typing in:
-
-```crawler.links```
-returns an object containing visted, internal, and "other" links for external links, and links that don't use a standard url.
-
-```crawler.stop()```
-stop the crawler
-
-## Why?
-While Puppeteer, Nightmare, Selenium, Scrapy, and the heaps of other tools are great, I needed a no-install solution for automating web-based tasks at work, using a PC with restricted user policies. This script contains a collection of functions for mining data and building reports.
-
-## Benefits:
-  1. no install, assuming a web browser is available. This is especially useful on machines with limited admin rights & privelages.
-  2. bypass anti-bot security without having to spoof the user agent. Not foolproof, but surpisingly effective at evading detection and preventing IP bans.
-  3. pages are processed in the background, using the Fetch & DOM Parser APIs. While improving performance, this also helps prevent detection by preventing external resources from loading, such as tracking scripts, images, etc.
-  4. Operates asynchronously, so the browser doesn't freeze during the crawl, allowing the user to use the browser while crawling the background.
-  5. Using the browser's built-in network tab unlocks additional details like server response times, page sizes, etc. This allows the user to review crawl reports, look for errors, and track progress in realtime.
-
-## Reporting (CSV Export):
-Once the crawler stops, it generates a CSV report containing visited, queued, and external links. Visited links include the document title, if found.
+   2. runs out of links to process
+5. Once the crawler stops, a link report is generated, containing visited, queued, and external links. Visited links include the document title, if found.
 
 ## Notes on crawl speed & rate limiting: 
   1. Throttle controls can be adjusted using the built in delay timer. This reduces the chance of getting blocked by rate limiters.
   2. Use LIMIT to stop the crawler after visiting n links.
+
+### Tracking Crawler Status
+While the crawler is running, you can check the status in the console by typing in:
+
+```crawler.links```
+returns an object containing visted, internal, and "other" links for external links, and links that don't use a standard url.
+
+### Crawler Killswitch
+```crawler.stop()```
+stop the crawler
+
+
+## Benefits:
+1. no install, assuming a web browser is available.
+2. bypass weak anti-bot security without having to spoof the user agent.
+   1. pages are processed in the background, using the Fetch & DOM Parser APIs. Crawling in the background improves performance by skipping the need to render each tab, and reduces bandwidth external resources from loading, such as tracking scripts, images, etc.
+  4. Operates asynchronously, so the browser doesn't freeze during the crawl, allowing the user to use the browser while crawling the background.
+  5. Using the browser's built-in network tab unlocks additional details like server response times, page sizes, etc. This allows the user to review crawl reports, look for errors, and track progress in realtime.
+
+
 
 ## Browser Security Limitations:
 Out of the box, only 1 domain can be crawled per instance. External links cannot be followed due to baked-in browser security. While I can't recommend bypassing browser security, I have had success with the following two methods:
