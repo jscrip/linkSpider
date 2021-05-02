@@ -22,10 +22,10 @@ class linkSpider {
     }
   }
   emptyQ(){
-    return this.links.q.size < 1;
+    return this.links.q.size == 0;
   }
   limitReached(){
-    return this.limit < 1;
+    return this.limit == 0;
   }
   save(data, fileName){
       var d = document;
@@ -52,12 +52,12 @@ class linkSpider {
         if(a.indexOf("http") == 0){}else if(a.indexOf("/") == 0){
             a = this.domain+a;
         }else{
-    	    var relDir = a.match(/\.\.\//gim) || [];
-            var baseURL = (url.replace("//","@@")).split("/").slice(0,(-1*relDir.length-1)).join("/")+"/"
-            a = a.replace(/\.\.\//gim,"");
-            a = (baseURL+a).replace(/\/+/gim,"/");
-            a = a.replace("@@","//")
-        }
+    		var relDir = a.match(/\.\.\//gim) || [];
+    		var baseURL = (url.replace("//","@@")).split("/").slice(0,(-1*relDir.length-1)).join("/")+"/"
+    		a = a.replace(/\.\.\//gim,"");
+        a = (baseURL+a).replace(/\/+/gim,"/");
+        a = a.replace("@@","//")
+      }
         if(a && typeof a == "string" && !this.links.visited.has(a)){
             if (a.indexOf(this.domain) > -1) {
               this.links.q.add(a);
@@ -71,6 +71,7 @@ class linkSpider {
   buildReportItem(doc,status,url){
     return {
       title:this.cleanStr(doc.querySelector("title").innerText),
+      h1:[...doc.querySelectorAll("h1")].map(el => this.cleanStr(el.innerText)),
       status,
       url
     }
