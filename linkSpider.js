@@ -2,7 +2,7 @@ var crawler;
 (() => {
 class linkSpider {
   constructor() {
-    this.limit = 100;
+    this.limit = 10;
     this.errorLimit = 50;
     this.delay = async ms => (console.log(`Delaying ${this.ms} milliseconds`),new Promise(r => setTimeout(r, ms)));
     this.ms = 0;// 500;
@@ -25,7 +25,7 @@ class linkSpider {
     return this.links.q.size == 0;
   }
   limitReached(){
-    return this.limit == 0;
+    return this.limit == -1;
   }
   save(data, fileName){
       var d = document;
@@ -104,18 +104,19 @@ class linkSpider {
   }
   async fetchURL(url) {
     if(typeof url == "string" && url.indexOf("http") == 0){
-    this.limit--;
     this.links.q.delete(url);
     this.links.visited.add(url);
     try {
       if(this.ms > 0) await this.delay(this.ms);
       var response = await fetch(url);
       var status = response.status;
-      status == 200 ? this.processResponse(response) : this.processReportError(status,url)
+      status == 200 ? this.processResponse(response) : this.processReportError(status,url);
+
     }catch(e){
       this.processReportError("Error when attempting to fetch url",url)
       console.log({e})}
     }
+    this.limit--;
     this.next();
   }
 }
