@@ -1,19 +1,31 @@
+var crawler;
+(() => {
 class linkSpider {
   constructor() {
-    this.LIMIT = 200;
-    this.delay = async ms => new Promise(r => setTimeout(r, ms));
-    this.ms = false;// 500;
+    this.limit = 100;
+    this.errorLimit = 50;
+    this.delay = async ms => (console.log(`Delaying ${this.ms} milliseconds`),new Promise(r => setTimeout(r, ms)));
+    this.ms = 0;// 500;
     this.stop = false;
+    this.stopped = false;
     this.domain = window.location.origin;
     this.startPage = window.location.href;
-    this.timer = setInterval(() => console.log({links:this.links, limit:this.LIMIT}), 4000);
-    this.titles = {};
+    this.timer = setInterval(() => console.log({links:this.links, limit:this.limit}), 4000);
+    this.report = [];
+    this.errors = [];
     this.links = {
       internal: new Set(),
       other: new Set(),
       visited: new Set(),
+      errors:new Set(),
       q: new Set()
     }
+  }
+  emptyQ(){
+    return this.links.q.size < 1;
+  }
+  limitReached(){
+    return this.limit < 1;
   }
   save(data, fileName){
       var d = document;
@@ -24,82 +36,104 @@ class linkSpider {
       a.click();
       d.body.removeChild(a);
   }
-  flattenJSON(o) {
-    return Object.entries(o).reduce((arr,e) => {
-      for (let url of e[1]){
-        if(e[0] == "internal"){
-          
-        }else if(e[0] == "visited"){
-          arr.push({type:e[0],url:url,title:this.titles[url]});
-        }else{
-          arr.push({type:e[0],url:url,title:""});
-        }      
-      }
-      return arr;
-    },[]);
-  }
   halt() {
+    this.stopped = true;
     this.stop = true;
     clearInterval(this.timer);
     console.log("Crawl Complete. Saving Link Report...");
     try{
-      this.save(this.flattenJSON(this.links), `${this.domain}_link_report`);  
+      this.save(this.report, `${this.domain}_link_report`);
     }catch(e){console.log({"saveError":e})}
   }
   cleanStr(s) { return s.replace(/[^a-z0-9\s]/gim,"").replace(/[\s]+/gim, " ").trim()}
-  parse(htmlString,url) {
+  extractLinks(doc, url){
+      for(let a of doc.links){
+        a = a.attributes.href.nodeValue.split("#")[0];
+        if(a.indexOf("http") == 0){}else if(a.indexOf("/") == 0){
+            a = this.domain+a;
+        }else{
+    	    var relDir = a.match(/\.\.\//gim) || [];
+            var baseURL = (url.replace("//","@@")).split("/").slice(0,(-1*relDir.length-1)).join("/")+"/"
+            a = a.replace(/\.\.\//gim,"");
+            a = (baseURL+a).replace(/\/+/gim,"/");
+            a = a.replace("@@","//")
+        }
+        if(a && typeof a == "string" && !this.links.visited.has(a)){
+            if (a.indexOf(this.domain) > -1) {
+              this.links.q.add(a);
+              this.links.internal.add(a);
+            } else {
+              this.links.other.add(a);
+            }
+        }
+    }
+  }
+  buildReportItem(doc,status,url){
+    return {
+      title:this.cleanStr(doc.querySelector("title").innerText),
+      status,
+      url
+    }
+  }
+  processReportError(status,url){
+    this.links.errors.add(url);
+    var obj = {
+      title:`Error`,
+      status,
+      url
+    };
+    this.report.push(obj);
+    this.errors.push(obj);
+    if(this.errors.length > this.errorLimit) this.stop = true;
+  }
+  async processResponse(response){
+    var htmlString = await response.text();
+    var doc = this.parseHTML(htmlString,response.url);
+    this.extractLinks(doc, response.url);
+    this.report.push(this.buildReportItem(doc,response.status,response.url));
+  }
+  parseHTML(htmlString,url) {
     var parser = new DOMParser();
-    var doc = parser.parseFromString(htmlString, "text/html");
-    var links = new Set(doc.links);
-    var title = doc.title;
-    this.titles[url] = title;
-    [...links].forEach(link => {
-      var a = link.href;
-      if (a.indexOf(this.domain) > -1) {
-        this.links.q.add(a);
-        this.links.internal.add(a);
-      } else {
-        this.links.other.add(a);
-      }
-  });
+    return parser.parseFromString(htmlString, "text/html");
+  }
+  next(){
+    !this.emptyQ() && !this.limitReached() && !this.stop ?
+      this.fetchURL([...this.links.q].shift()) :
+      this.stopped ? null : this.halt();
   }
   async fetchURL(url) {
-    this.links.visited.add(url);
+    if(typeof url == "string" && url.indexOf("http") == 0){
+    this.limit--;
     this.links.q.delete(url);
+    this.links.visited.add(url);
     try {
-      if(!isNaN(this.ms) && this.ms > 0){
-        console.log(`Delaying ${this.ms} milliseconds`);
-        await this.delay(this.ms);
-      }
-      var response = await fetch(url.split("#")[0].split("?")[0]);
-      if (response.status == 200) {
-        var htmlString = await response.text();
-        this.parse(htmlString,url);
-      }
-    }catch(e){console.log({e})}
-    if(this.links.q.size > 0 && this.links.visited.size < this.LIMIT && this.stop == false){
-        this.fetchURL([...this.links.q].shift())
-    }else{
-      this.halt();
+      if(this.ms > 0) await this.delay(this.ms);
+      var response = await fetch(url);
+      var status = response.status;
+      status == 200 ? this.processResponse(response) : this.processReportError(status,url)
+    }catch(e){
+      this.processReportError("Error when attempting to fetch url",url)
+      console.log({e})}
     }
+    this.next();
   }
 }
   var options = {
     scripts: ["https://d3js.org/d3.v6.min.js"]
   }
 	var run = () => {
-    var crawler = new linkSpider();
-    crawler.fetchURL(window.location.href);
-    
+    crawler = new linkSpider();
+    crawler.extractLinks(document, document.location.href);
+    crawler.fetchURL(crawler.next());
   }
   const loadScripts = ({scripts}) => {
-    var scriptCountdown = scripts.length;
+    var loaded = 0;
     var loadScript = (url) => {
-      var scriptsLoaded = () => scriptCountdown == 0 ? run() : null;
+      var scriptsLoaded = () => loaded == scripts.length ? run() : null;
       var imported = document.createElement('script');
       imported.src = url;
       imported.addEventListener("load", () => {
-        scriptCountdown--;
+        loaded++;
         scriptsLoaded();
       });
       document.head.appendChild(imported);
@@ -107,3 +141,4 @@ class linkSpider {
     scripts.forEach(loadScript)
   }
   loadScripts(options);
+})()
