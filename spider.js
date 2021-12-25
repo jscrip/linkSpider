@@ -1,3 +1,4 @@
+(async () => {
 var options = {
   maxDelay:20,
   crawlLimit:5000,
@@ -32,7 +33,7 @@ var crawler = async options => {
       mediaLink: (a) => a.match(/\.(jpg|jpeg|png|gif|webp|webm|mov|pdf|svg|css|js|mpeg|mpg|csv|xls|doc)/gim),
       startsOnDir: (a) => a.indexOf("/") == 0 || a.indexOf("./") == 0,
       absoluteRef: (a) => a.indexOf("http") == 0,
-      inboundLink:(a) => a.indexOf(options.domain) == 0,
+      inboundLink:(a) => a.indexOf(options.domain) > -1,
       otherLink:(a) => a.indexOf(":") > 0,
       fileExt: (a) => a.lastIndexOf("/") < a.lastIndexOf("."),
       endsOnDir: (a) => a.match(/\/$/gim),
@@ -43,9 +44,10 @@ var crawler = async options => {
   const labelLink = (el,url) => {
    var testInbound = (a) => {
     var inboundA = cond.inboundLink(a);
-     if((inboundA || cond.inboundLink(el.href)) && cond.mediaLink(a)){ //inbound link (same domain as startURL)
+     if((inboundA || cond.inboundLink(a)) && cond.mediaLink(a) === null){ //inbound link (same domain as startURL)
       inboundA ? report.links.add(a) :report.links.add(el.href);
      }else{
+			console.log({otherLink:a})
       report.otherLinks.add(a);
      }
    }
@@ -109,6 +111,7 @@ var crawler = async options => {
      await delay(t);
      report.crawled.add(link);
     try{
+		 console.log(link)
      var res = await fetch(link,{mode:"cors",redirect:"follow"});
      await processResponse(res,link);
     }catch(err){
@@ -153,3 +156,5 @@ const loadScripts = ({scripts}) => {
   scripts.forEach(loadScript)
 };
 loadScripts(options);
+
+})()
