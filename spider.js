@@ -29,7 +29,7 @@ var crawler = async options => {
   const cond = {
       crawled: (a) => !report.crawled.has(a+"/") && !report.crawled.has(a),
       status200: (r) => r.status == 200,
-      mediaLink: (a) => a.match(/\.(jpg|jpeg|png|gif|webp|webm|mov|pdf|svg|css|js|mpeg|mpg|csv|xls|doc)$/gim),
+      mediaLink: (a) => a.match(/\.(jpg|jpeg|png|gif|webp|webm|mov|pdf|svg|css|js|mpeg|mpg|csv|xls|doc)/gim),
       startsOnDir: (a) => a.indexOf("/") == 0 || a.indexOf("./") == 0,
       absoluteRef: (a) => a.indexOf("http") == 0,
       inboundLink:(a) => a.indexOf(options.domain) == 0,
@@ -43,7 +43,7 @@ var crawler = async options => {
   const labelLink = (el,url) => {
    var testInbound = (a) => {
     var inboundA = cond.inboundLink(a);
-     if(inboundA || cond.inboundLink(el.href)){ //inbound link (same domain as startURL)
+     if((inboundA || cond.inboundLink(el.href)) && cond.mediaLink(a)){ //inbound link (same domain as startURL)
       inboundA ? report.links.add(a) :report.links.add(el.href);
      }else{
       report.otherLinks.add(a);
