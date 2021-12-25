@@ -30,7 +30,7 @@ var crawler = async options => {
   const cond = {
       crawled: (a) => !report.crawled.has(a+"/") && !report.crawled.has(a),
       status200: (r) => r.status == 200,
-      mediaLink: (a) => a.match(/\.(jpg|jpeg|png|gif|webp|webm|mov|pdf|svg|css|js|mpeg|mpg|csv|xls|doc)/gim),
+      mediaLink: (a) => a.match(/\.(jpg|jpeg|png|gif|webp|webm|mov|pdf|svg|css|js|mp4|mpeg|mpg|csv|xls|doc)/gim),
       startsOnDir: (a) => a.indexOf("/") == 0 || a.indexOf("./") == 0,
       absoluteRef: (a) => a.indexOf("http") == 0,
       inboundLink:(a) => a.indexOf(options.domain) > -1,
