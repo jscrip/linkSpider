@@ -4,7 +4,7 @@
 An injectable JavaScript Web Crawler built for modern browsers.
 
 ## Why ?
-I saw an opportunity to automate redundant tasks at work, but I couldn't install software on my work PC. It was difficult to get new software approved, so I began experimenting with building web crawlers that can be injected into a browser such as firefox or chrome.
+I saw an opportunity to automate redundant tasks at work, but I couldn't install software on my work PC. It was difficult to get new software approved, so I experimented with building web crawlers that could be injected into a browser such as firefox or chrome.
 
 ## How to use?
 1. First, you will need a website to crawl, we'll call this the target domain.
@@ -38,7 +38,11 @@ stop the crawler
    2. Other browser tabs can be used while the crawler runs.
 4. Easily monitor the crawl in realtime using the network tab in the developer console. Get additional data such as server response time, and page size.
 
-## Browser Security Limitations:
+## Limitations:
+1. Does not work for pages that rely on Front-End Javascript to display content. In theory, this can be solved by using a userscript plugin and opening each page in a new tab. It is possible to manage tabs and inject scripts using such a tool. While I have experimented with this method, I do not require this method, and have ceased to work on it for the time being.
+2. Bugs are likely, and anti-bot security can still detect the crawler in some cases. Use at your own risk and never use this script on a site without permission. You may get banned from certain sites if they believe you are abusing their systems.
+
+## Additional Browser Security Limitations:
 Out of the box, only 1 domain can be crawled per instance. External links cannot be followed due to baked-in browser security. While I can't recommend bypassing browser security, I have had success with the following two methods:
 
 1. Browser Extensions
