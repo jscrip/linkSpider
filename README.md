@@ -1,61 +1,59 @@
-# linkSpider.js
+# linkSpider (v2)
 
-## What is linkSpider.js?
-An injectable JavaScript Web Crawler built for modern browsers.
+An injectable, high-performance JavaScript web crawler designed for modern browsers. This script is built to be pasted directly into the developer console to automate link discovery and SEO data extraction without requiring any software installation.
 
-## Why ?
-I saw an opportunity to automate redundant tasks at work, but I couldn't install software on my work PC. It was difficult to get new software approved, so I experimented with building web crawlers that could be injected into a browser such as firefox or chrome.
+## Key Features
 
-## How to use?
-1. First, you will need a website to crawl, we'll call this the target domain.
-2. Open the browser, go to the target domain, then copy and paste the code into the developer console. 
-3. Adjust the settings such as PAGE LIMIT, then to start the crawler, Press Enter. 
-4. Upon injection, the crawler gets all links from the page, then crawls inbound links until it:
-   1. reaches the page limit
-   2. visits all pages found on to the target domain
-5. Once the crawler stops, a link report is generated, containing visited, queued, and external links. Visited links include the document title, if found.
+- **Zero-Install**: Runs entirely in the browser console using native APIs (`Fetch`, `DOMParser`, `AbortSignal`).
+- **Intelligent Normalization**: Automatically handles trailing slashes and query strings to prevent duplicate crawling of the same page.
+- **Extension-Aware**: Detects file extensions (like `.html`, `.php`) to ensure correct link formatting.
+- **SEO Extraction**: Automatically captures Page Title, H1 tags, and Meta Descriptions.
+- **Redirect Handling**: Monitors redirects and captures the final destination URL for accurate reporting.
+- **Anti-Bot Friendly**: Includes configurable delays and random jitter to mimic human-like browsing speeds.
+- **Automated Reporting**: Generates a comprehensive JSON report and prompts for download upon completion or manual stop.
 
-## Notes on crawl speed & rate limiting: 
-  1. Throttle controls can be adjusted using the built in delay timer. This reduces the chance of getting blocked by rate limiters.
-  2. Use LIMIT to stop the crawler after visiting n links.
+## How to Use
 
-### Tracking Crawler Status
-While the crawler is running, you can check the status in the console by typing in:
+1. Navigate to the target domain in your browser.
+2. Open the Developer Tools (F12 or Ctrl+Shift+I).
+3. Copy the contents of `index.js` and paste it into the **Console** tab.
+4. Press **Enter** to start the crawl.
 
-```crawler.links```
-returns an object containing visted, internal, and "other" links for external links, and links that don't use a standard url.
+### Configuration
 
-### Crawler Killswitch
-```crawler.stop()```
-stop the crawler
+You can adjust the crawler's behavior by modifying the parameters in the first line of the script:
 
+```javascript
+(async (lim = 250, gap = 300, to = 8000, skip = 'pdf|mp4|zip|jpg|png|gif|css|js|ico') => {
+```
 
-## Benefits:
-1. no install, assuming a web browser is available.
-2. bypass weak anti-bot security without spoofing the user agent.
-3. Crawler runs asynchronously in the background, using the Fetch & DOM Parser APIs. 
-   1. Parsing pages in the background improves performance and reduces the request volume by skipping external resources like tracking scripts and images.
-   2. Other browser tabs can be used while the crawler runs.
-4. Easily monitor the crawl in realtime using the network tab in the developer console. Get additional data such as server response time, and page size.
+- `lim`: Maximum number of pages to crawl (default: 250).
+- `gap`: Base delay between requests in milliseconds (default: 300).
+- `to`: Request timeout in milliseconds (default: 8000).
+- `skip`: Pipe-separated list of file extensions to ignore.
 
-## Limitations:
-1. Does not work for pages that rely on Front-End Javascript to display content. In theory, this can be solved by using a userscript plugin and opening each page in a new tab. It is possible to manage tabs and inject scripts using such a tool. While I have experimented with this method, I do not require this method, and have ceased to work on it for the time being.
-2. Bugs are likely, and anti-bot security can still detect the crawler in some cases. Use at your own risk and never use this script on a site without permission. You may get banned from certain sites if they believe you are abusing their systems.
+## Console API
 
-## Additional Browser Security Limitations:
-Out of the box, only 1 domain can be crawled per instance. External links cannot be followed due to baked-in browser security. While I can't recommend bypassing browser security, I have had success with the following two methods:
+While the crawler is running, you can interact with it via the `window.crawler` object:
 
-1. Browser Extensions
-   1. Userscript Managers like Tampermonkey and Greasemonkey take browser-based automatation to another level.
-   2. Automate custom JavaScript injection on any webpage.
-   3. Match scripts to specific pages by creating filters & rules based on URL patterns, params, etc.
-   4. Cross-tab Communication enables tabs to control other tabs. Bypass the 1-domain limitation by automatically creating a new tab for each external domain.
-  
-2. Proxy Server
-   1. An attempt to trick the browser into making external requests by tunneling requests through a proxy server.
-   2. Access the proxy server from the browser, and launch the crawler with a seed URL or list of links.
-   3. The proxy server handles the request and forwards the response to the browser, bypassing CORS restrictions.
-  
-## Future Plans:
-Expanding on more than just link collection:
-The DOM parser API can be used to collect more than just links. I have plans to expand on the capabilities, such as natural language processing, SEO reports, extracting tabular data, searching for certain types of files, etc.
+- `crawler.stop()`: Halts the crawler immediately and prompts for a results download.
+- `crawler.report()`: Returns a live summary of the current crawl status, including visited, failed, and external links.
+- `crawler.docs`: An array of all successfully crawled page data.
+- `crawler.links`: Access the raw `Set` objects for visited, queued, and external links.
+
+## Output
+
+The crawler generates a JSON report containing:
+- **Summary**: Counts of successful, failed, and external links.
+- **Docs**: Detailed data for each page (URL, Final URL, Title, H1, Description).
+- **Failed**: A list of URLs that returned errors.
+- **External**: A list of all unique external domains discovered.
+
+## Limitations
+
+- **CORS**: Subject to browser Same-Origin Policy. It can only crawl the domain it was injected into.
+- **Dynamic Content**: Does not execute client-side JavaScript. Content rendered purely via JS frameworks (like React/Vue) after the initial load may not be fully captured.
+- **Browser Security**: Some sites with strict security headers or advanced anti-bot protections may block the crawler.
+
+---
+*Note: Always ensure you have permission to crawl a website. Use responsibly.*
